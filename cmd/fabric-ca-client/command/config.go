@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/hyperledger/fabric-ca/lib/common/idemix"
-	"github.com/spf13/viper"
 
 	"github.com/cloudflare/cfssl/csr"
 	"github.com/cloudflare/cfssl/log"
@@ -227,9 +226,6 @@ func (c *ClientCmd) ConfigInit() error {
 		c.logLevel = logLevel
 	}
 	calog.SetLogLevel(c.logLevel, debug)
-	if err != nil {
-		return err
-	}
 
 	c.cfgFileName, c.homeDirectory, err = util.ValidateAndReturnAbsConf(c.cfgFileName, c.homeDirectory, cmdName)
 	if err != nil {
@@ -266,7 +262,7 @@ func (c *ClientCmd) ConfigInit() error {
 		}
 	}
 
-	err = c.myViper.Unmarshal(c.clientCfg)
+	err = c.myViper.Unmarshal(c.clientCfg, lib.UnmarshalDecoderOpts())
 	if err != nil {
 		return errors.Wrapf(err, "Incorrect format in file '%s'", c.cfgFileName)
 	}
@@ -329,7 +325,7 @@ func (c *ClientCmd) createDefaultConfigFile() error {
 
 	myhost := c.myViper.GetString("myhost")
 
-	idemixCurveID := viper.GetString("idemix.curve")
+	idemixCurveID := c.myViper.GetString("idemix.curve")
 	if idemixCurveID == "" {
 		idemixCurveID = idemix.DefaultIdemixCurve
 	}

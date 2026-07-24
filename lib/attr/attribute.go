@@ -105,6 +105,33 @@ func CanRegisterAttribute(requestedAttr *api.Attribute, allRequestedAttrs []api.
 // attributeMap contains the control definition for reserved (hf.) attributes
 var attributeMap = initAttrs()
 
+// canonicalAttrNames maps the lowercase form of each reserved hf.* attribute
+// name to its canonical (mixed-case) form.  This is needed because viper
+// lowercases all configuration keys during YAML unmarshaling; without this
+// lookup the canonical names would be lost when reading server-config files.
+var canonicalAttrNames = buildCanonicalAttrNames()
+
+func buildCanonicalAttrNames() map[string]string {
+	canonical := []string{
+		Roles, DelegateRoles, Revoker, IntermediateCA,
+		GenCRL, RegistrarAttr, AffiliationMgr, EnrollmentID, Type, Affiliation,
+	}
+	m := make(map[string]string, len(canonical))
+	for _, name := range canonical {
+		m[strings.ToLower(name)] = name
+	}
+	return m
+}
+
+// canonicalName returns the canonical (mixed-case) attribute name for known
+// hf.* attributes, preserving the original name for any unknown attributes.
+func canonicalName(name string) string {
+	if c, ok := canonicalAttrNames[strings.ToLower(name)]; ok {
+		return c
+	}
+	return name
+}
+
 func initAttrs() map[string]*attributeControl {
 	var attributeMap = make(map[string]*attributeControl)
 
@@ -394,10 +421,14 @@ func GetAttrValue(attrs []api.Attribute, name string) string {
 	return ""
 }
 
-// ConvertAttrs converts attribute string into an Attribute object array
+// ConvertAttrs converts attribute string into an Attribute object array.
+// Attribute names for known hf.* attributes are normalized to their canonical
+// mixed-case form so that values loaded from YAML (where viper lowercases all
+// keys) are stored correctly.
 func ConvertAttrs(inAttrs map[string]string) ([]api.Attribute, error) {
 	var outAttrs []api.Attribute
 	for name, value := range inAttrs {
+		name = canonicalName(name)
 		sattr := strings.Split(value, ":")
 		if len(sattr) > 2 {
 			return []api.Attribute{}, errors.Errorf("Multiple ':' characters not allowed "+

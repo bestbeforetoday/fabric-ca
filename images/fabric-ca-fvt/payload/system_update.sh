@@ -19,7 +19,7 @@ dpkg-reconfigure locales && update-locale LANG=en_US.UTF-8 || let RC+=1
 # Install more test depedencies
 
 apt-get -y install --no-install-recommends rsyslog bc vim lsof sqlite3 haproxy postgresql-$PGVER \
-           postgresql-client-common isag jq git html2text \
+           postgresql-client-common isag jq yq git html2text \
            debconf-utils zsh htop python-is-python3 \
            parallel netcat-openbsd wget lsb-release gnupg ca-certificates || let RC+=1
 apt-get -y install ssl-cert || let RC+=1

@@ -91,7 +91,11 @@ for driver in mysql postgres sqlite3; do
 
    # Setup CA server
    $SCRIPTDIR/fabric-ca_setup.sh -D -I -d $driver
-   genAffYaml >> $CA_CFG_PATH/runFabricCaFvt.yaml
+   genAffYaml > /tmp/affiliations.yaml
+   yq -y '.affiliations = input.affiliations' \
+      $CA_CFG_PATH/runFabricCaFvt.yaml /tmp/affiliations.yaml \
+      > /tmp/runFabricCaFvt.yaml \
+      && mv /tmp/runFabricCaFvt.yaml $CA_CFG_PATH/runFabricCaFvt.yaml
    $SCRIPTDIR/fabric-ca_setup.sh -D -S -X -d $driver -x $CA_CFG_PATH
    if test "$?" -ne 0; then
       kill $HTTP_PID

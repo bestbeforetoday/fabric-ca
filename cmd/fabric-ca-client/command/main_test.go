@@ -1050,15 +1050,13 @@ func testConfigFileTypes(t *testing.T) {
 	err := RunMain([]string{cmdName, "enroll", "-u", enrollURL,
 		"-c", "config/client-config.txt"})
 	if err == nil {
-		t.Errorf("Enroll command invoked with -c config/client-config.txt should have failed: %v",
-			err.Error())
+		t.Error("Enroll command invoked with -c config/client-config.txt should have failed")
 	}
 
 	err = RunMain([]string{cmdName, "enroll", "-u", enrollURL,
 		"-c", "config/client-config.mf"})
 	if err == nil {
-		t.Errorf("Enroll command invoked with -c config/client-config.mf should have failed: %v",
-			err.Error())
+		t.Error("Enroll command invoked with -c config/client-config.mf should have failed")
 	}
 
 	fName := os.TempDir() + "/client-config.json"

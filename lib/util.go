@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 
 	"github.com/cloudflare/cfssl/log"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/grantae/certinfo"
 	"github.com/hyperledger/fabric-ca/api"
 	"github.com/hyperledger/fabric-ca/lib/caerrors"
@@ -67,6 +68,19 @@ func LoadPEMCertPool(certFiles []string) (*x509.CertPool, error) {
 	return certPool, nil
 }
 
+// UnmarshalDecoderOpts returns viper decoder options that compose the standard
+// hooks (StringToTimeDuration, StringToSlice) with TextUnmarshaller support,
+// ensuring consistent struct decoding across viper versions.
+func UnmarshalDecoderOpts() viper.DecoderConfigOption {
+	return viper.DecodeHook(
+		mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToSliceHookFunc(","),
+			mapstructure.TextUnmarshallerHookFunc(),
+		),
+	)
+}
+
 // UnmarshalConfig unmarshals a configuration file
 func UnmarshalConfig(config interface{}, vp *viper.Viper, configFile string,
 	server bool) error {
@@ -77,13 +91,14 @@ func UnmarshalConfig(config interface{}, vp *viper.Viper, configFile string,
 		return errors.Wrapf(err, "Failed to read config file '%s'", configFile)
 	}
 
-	err = vp.Unmarshal(config)
+	decoderOpts := UnmarshalDecoderOpts()
+	err = vp.Unmarshal(config, decoderOpts)
 	if err != nil {
 		return errors.Wrapf(err, "Incorrect format in file '%s'", configFile)
 	}
 	if server {
 		serverCfg := config.(*ServerConfig)
-		err = vp.Unmarshal(&serverCfg.CAcfg)
+		err = vp.Unmarshal(&serverCfg.CAcfg, decoderOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Incorrect format in file '%s'", configFile)
 		}

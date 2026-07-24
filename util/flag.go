@@ -187,7 +187,9 @@ func FlagString(v *viper.Viper, flags *pflag.FlagSet, name, short string, def st
 	bindFlag(v, flags, name)
 }
 
-// common binding function
+// bindFlag binds a pflag to viper by name.  Viper will only use the bound
+// flag's value when the flag has actually been set by the user (HasChanged),
+// so default-value pflags do not override values from configuration files.
 func bindFlag(v *viper.Viper, flags *pflag.FlagSet, name string) {
 	flag := flags.Lookup(name)
 	if flag == nil {

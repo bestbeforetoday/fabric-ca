@@ -46,12 +46,12 @@ type ServerConfig struct {
 	CAcfg CAConfig `skip:"true"`
 	// The names of the CA configuration files
 	// This is empty unless there are non-default CAs served by this server
-	CAfiles []string `help:"A list of comma-separated CA configuration files"`
+	CAfiles []string `help:"A list of comma-separated CA configuration files" mapstructure:"cafiles"`
 	// The number of non-default CAs, which is useful for a dev environment to
 	// quickly start any number of CAs in a single server
-	CAcount int `def:"0" help:"Number of non-default CA instances"`
+	CAcount int `def:"0" help:"Number of non-default CA instances" mapstructure:"cacount"`
 	// Size limit of an acceptable CRL in bytes
-	CRLSizeLimit int `def:"512000" help:"Size limit of an acceptable CRL in bytes"`
+	CRLSizeLimit int `def:"512000" help:"Size limit of an acceptable CRL in bytes" mapstructure:"crlsizelimit"`
 	// CompMode1_3 determines if to run in comptability for version 1.3
 	CompMode1_3 bool `skip:"true"`
 	// Metrics contains the configuration for provider and statsd
